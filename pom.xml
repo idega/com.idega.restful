@@ -30,6 +30,12 @@
             <groupId>com.idega.block.platform</groupId>
             <artifactId>com.idega.core</artifactId>
         </dependency>
+        
+        <!-- GSON from Google -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
 
         <!-- RESTful Web Services -->
         <dependency>
@@ -62,6 +68,37 @@
             <artifactId>jersey-client</artifactId>
             <version>${com.sun.jersey-version}</version>
         </dependency>
+        <dependency>
+	        <groupId>com.sun.jersey.contribs</groupId>
+	        <artifactId>jersey-spring</artifactId>
+	        <version>${com.sun.jersey-version}</version>
+	        <exclusions>
+		       <exclusion>
+		           <groupId>org.springframework</groupId>
+		           <artifactId>spring</artifactId>
+		       </exclusion>
+		       <exclusion>
+		           <groupId>org.springframework</groupId>
+		           <artifactId>spring-core</artifactId>
+		       </exclusion>
+		       <exclusion>
+		           <groupId>org.springframework</groupId>
+		           <artifactId>spring-web</artifactId>
+		       </exclusion>
+		       <exclusion>
+		           <groupId>org.springframework</groupId>
+		           <artifactId>spring-beans</artifactId>
+		       </exclusion>
+		       <exclusion>
+		           <groupId>org.springframework</groupId>
+		           <artifactId>spring-context</artifactId>
+		       </exclusion>
+	           <exclusion>
+	               <groupId>org.springframework</groupId>
+	               <artifactId>spring-aop</artifactId>
+	           </exclusion>
+	        </exclusions>
+    	</dependency>
     </dependencies>
 
     <repositories>
