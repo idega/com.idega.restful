@@ -3,6 +3,7 @@ package com.idega.restful.servlet;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.FilterChain;
@@ -15,13 +16,28 @@ import javax.servlet.http.HttpServletResponse;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.presentation.IWContext;
+import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringUtil;
+import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 
 public class DefaulRestfulServlet extends SpringServlet {
 
 	private static final long serialVersionUID = 8737746855252117898L;
+
+	private static final Logger LOGGER = Logger.getLogger(DefaulRestfulServlet.class.getName());
+
+	@Override
+	protected void initiate(ResourceConfig rc, WebApplication wa) {
+		try {
+            wa.initiate(rc, new IWSpringComponentProviderFactory(rc, getContext()));
+        } catch (RuntimeException e) {
+            LOGGER.log(Level.SEVERE, "Exception occurred when intialization", e);
+            throw e;
+        }
+	}
 
 	@Override
 	public int service(URI baseUri, URI requestUri, HttpServletRequest request,	HttpServletResponse response) throws ServletException, IOException {

@@ -4,6 +4,9 @@ public class RestfulConstants {
 
 	private RestfulConstants() {}
 
-	public static final String	IW_BUNDLE_IDENTIFIER = "com.idega.restful";
+	public static final String	IW_BUNDLE_IDENTIFIER = "com.idega.restful",
+
+								URI = "/rest",
+								URI_LOCALIZED = "localized";
 
 }
