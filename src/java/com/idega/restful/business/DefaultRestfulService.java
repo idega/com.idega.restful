@@ -51,6 +51,10 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 		}
 	}
 
+	protected boolean isOKResponse(Response response) {
+		return response != null && Response.Status.OK.getStatusCode() == response.getStatus();
+	}
+
 	protected Response getResponse(Response.Status status, Serializable message) {
 		ResponseBuilder responseBuilder = Response.status(status.getStatusCode());
 		Response response = responseBuilder.entity(getJSON(message)).build();
