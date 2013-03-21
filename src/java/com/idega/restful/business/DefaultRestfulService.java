@@ -1,6 +1,8 @@
 package com.idega.restful.business;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -11,6 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.google.gson.Gson;
+import com.idega.builder.bean.AdvancedProperty;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWBundle;
@@ -18,6 +21,8 @@ import com.idega.idegaweb.IWResourceBundle;
 import com.idega.restful.RestfulConstants;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.ArrayUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 public abstract class DefaultRestfulService extends DefaultSpringBean {
@@ -55,21 +60,32 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 		return response != null && Response.Status.OK.getStatusCode() == response.getStatus();
 	}
 
-	protected Response getResponse(Response.Status status, Serializable message) {
+	protected Response getResponse(Response.Status status, Serializable message, AdvancedProperty... headers) {
 		ResponseBuilder responseBuilder = Response.status(status.getStatusCode());
-		Response response = responseBuilder.entity(getJSON(message)).build();
+		responseBuilder = responseBuilder.entity(getJSON(message));
+		if (!ArrayUtil.isEmpty(headers)) {
+			for (AdvancedProperty header: headers) {
+				responseBuilder.header(header.getName(), header.getValue());
+			}
+		}
+		Response response = responseBuilder.build();
 		return response;
 	}
 
-	protected Response getOKResponse(Serializable message) {
+	protected <T extends Serializable> Response getResponse(Response.Status status, List<T> entities, AdvancedProperty... headers) {
+		Serializable message = ListUtil.isEmpty(entities) ? new ArrayList<T>(0) : new ArrayList<T>(entities);
+		return getResponse(status, message, headers);
+	}
+
+	protected Response getOKResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.OK, message);
 	}
 
-	protected Response getBadRequestResponse(Serializable message) {
+	protected Response getBadRequestResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.BAD_REQUEST, message);
 	}
 
-	protected Response getInternalServerErrorResponse(Serializable message) {
+	protected Response getInternalServerErrorResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.INTERNAL_SERVER_ERROR, message);
 	}
 
