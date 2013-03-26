@@ -80,6 +80,10 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	protected Response getOKResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.OK, message);
 	}
+	protected <E extends Serializable> Response getOKResponse(List<E> entities) {
+		Serializable message = ListUtil.isEmpty(entities) ? new ArrayList<E>(0) : new ArrayList<E>(entities);
+		return getResponse(Response.Status.OK, message);
+	}
 
 	protected Response getBadRequestResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.BAD_REQUEST, message);
