@@ -1,6 +1,8 @@
 package com.idega.restful.business;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -18,6 +20,7 @@ import com.idega.idegaweb.IWResourceBundle;
 import com.idega.restful.RestfulConstants;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
 public abstract class DefaultRestfulService extends DefaultSpringBean {
@@ -63,6 +66,9 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
 	protected Response getOKResponse(Serializable message) {
 		return getResponse(Response.Status.OK, message);
+	}
+	protected <E extends Serializable> Response getOKResponse(List<E> entities) {
+		return getResponse(Response.Status.OK, ListUtil.isEmpty(entities) ? new ArrayList<E>(0) : new ArrayList<E>(entities));
 	}
 
 	protected Response getBadRequestResponse(Serializable message) {
