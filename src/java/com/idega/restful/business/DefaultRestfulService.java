@@ -13,13 +13,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.google.gson.Gson;
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.IWContext;
 import com.idega.restful.RestfulConstants;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
@@ -105,5 +108,28 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
     	return user;
 	}
-
+    
+    protected boolean logInUser(User user) {
+    	if (user == null) {
+    		return Boolean.FALSE;
+    	}
+    	
+    	IWContext iwc = CoreUtil.getIWContext();
+    	if (iwc == null) {
+    		return Boolean.FALSE;
+    	}
+    	
+    	if (iwc.isLoggedOn()) {
+    		return Boolean.TRUE;
+    	}
+    	
+    	try {
+			return LoginBusinessBean.getDefaultLoginBusinessBean()
+					.logInByPersonalID(CoreUtil.getIWContext(), user.getPersonalID());
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Unable to login: ", e);
+		}
+    	
+    	return Boolean.FALSE;
+    }
 }
