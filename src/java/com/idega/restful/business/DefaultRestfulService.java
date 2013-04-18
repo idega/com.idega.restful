@@ -13,15 +13,24 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import com.google.gson.Gson;
+<<<<<<< HEAD
 import com.idega.builder.bean.AdvancedProperty;
+=======
+import com.idega.core.accesscontrol.business.LoginBusinessBean;
+>>>>>>> 11e35bda11e2f42506e5fbfc8eac2b177d64801a
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.presentation.IWContext;
 import com.idega.restful.RestfulConstants;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
+<<<<<<< HEAD
 import com.idega.util.ArrayUtil;
+=======
+import com.idega.util.CoreUtil;
+>>>>>>> 11e35bda11e2f42506e5fbfc8eac2b177d64801a
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 
@@ -119,5 +128,28 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
     	return user;
 	}
-
+    
+    protected boolean logInUser(User user) {
+    	if (user == null) {
+    		return Boolean.FALSE;
+    	}
+    	
+    	IWContext iwc = CoreUtil.getIWContext();
+    	if (iwc == null) {
+    		return Boolean.FALSE;
+    	}
+    	
+    	if (iwc.isLoggedOn()) {
+    		return Boolean.TRUE;
+    	}
+    	
+    	try {
+			return LoginBusinessBean.getDefaultLoginBusinessBean()
+					.logInByPersonalID(CoreUtil.getIWContext(), user.getPersonalID());
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Unable to login: ", e);
+		}
+    	
+    	return Boolean.FALSE;
+    }
 }
