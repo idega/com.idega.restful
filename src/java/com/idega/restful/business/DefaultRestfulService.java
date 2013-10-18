@@ -12,6 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.google.gson.Gson;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
 import com.idega.core.business.DefaultSpringBean;
@@ -20,11 +22,13 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.restful.RestfulConstants;
+import com.idega.user.business.StandardGroup;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 public abstract class DefaultRestfulService extends DefaultSpringBean {
 
@@ -88,6 +92,19 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	}
 
     protected User getUser(String userId) {
+    	return getUser(userId, false);
+    }
+
+    @Autowired(required=false)
+	private StandardGroup standardGroup;
+
+	private StandardGroup getStandardGroup() {
+		if (standardGroup == null)
+			ELUtil.getInstance().autowire(this);
+		return standardGroup;
+	}
+
+    protected User getUser(String userId, boolean createIfDoesNotExist) {
     	if (StringUtil.isEmpty(userId))
     		return null;
 
@@ -103,33 +120,70 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
     		} catch (Exception e) {}
     	}
 
-    	if (user == null)
-    		getLogger().warning("Error getting user by ID: " + userId);
+    	if (user == null) {
+    		if (createIfDoesNotExist) {
+    			try {
+	    			StandardGroup standardGroup = getStandardGroup();
+	    			String login = userId;
+	    			if (login.length() > 32) {
+	    				login = login.substring(0, 31);
+	    			}
+	    			user = userBusiness.createUserWithLogin(
+	    					"User",
+	    					null,
+	    					userId,
+	    					null,
+	    					null,
+	    					null,
+	    					null,
+	    					standardGroup == null ? null : Integer.valueOf(standardGroup.getGroup().getId()),
+	    					login,
+	    					userId,
+	    					true,
+	    					null,
+	    					-1,
+	    					Boolean.FALSE,
+	    					Boolean.TRUE,
+	    					Boolean.TRUE,
+	    					null
+	    			);
+	    			if (userId.length() >= 10) {
+	    				user.setPersonalID(userId);
+	    			}
+	    			user.store();
+	    			return user;
+	    		} catch (Exception e) {
+	    			getLogger().log(Level.WARNING, "Error creating user by ID: " + userId, e);
+	    		}
+    		} else {
+    			getLogger().warning("Error getting user by ID: " + userId);
+    		}
+    	}
 
     	return user;
 	}
-    
+
     protected boolean logInUser(User user) {
     	if (user == null) {
     		return Boolean.FALSE;
     	}
-    	
+
     	IWContext iwc = CoreUtil.getIWContext();
     	if (iwc == null) {
     		return Boolean.FALSE;
     	}
-    	
+
     	if (iwc.isLoggedOn()) {
     		return Boolean.TRUE;
     	}
-    	
+
     	try {
 			return LoginBusinessBean.getDefaultLoginBusinessBean()
 					.logInByPersonalID(CoreUtil.getIWContext(), user.getPersonalID());
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Unable to login: ", e);
 		}
-    	
+
     	return Boolean.FALSE;
     }
 }
