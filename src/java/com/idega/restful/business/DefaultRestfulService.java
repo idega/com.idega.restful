@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.google.gson.Gson;
 import com.idega.core.accesscontrol.business.LoginBusinessBean;
@@ -96,6 +97,7 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
     }
 
     @Autowired(required=false)
+    @Qualifier("citizenStandardGroup")
 	private StandardGroup standardGroup;
 
 	private StandardGroup getStandardGroup() {
