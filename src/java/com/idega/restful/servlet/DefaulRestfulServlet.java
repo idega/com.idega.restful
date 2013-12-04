@@ -18,6 +18,7 @@ import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
 import com.idega.util.CoreUtil;
+import com.idega.util.RequestUtil;
 import com.idega.util.StringUtil;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.WebApplication;
@@ -59,16 +60,28 @@ public class DefaulRestfulServlet extends SpringServlet {
 
 	private void initializeContext(ServletRequest request, ServletResponse response) {
 		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null)
+		if (iwc == null) {
 			iwc = new IWContext((HttpServletRequest) request, (HttpServletResponse) response, getServletContext());
+		}
 
+		//	Checking if locale's parameter is provided
 		String localeString = request.getParameter(LocaleSwitcher.languageParameterString);
+
+		//	Checking if locale's parameter is provided in header
+		if (StringUtil.isEmpty(localeString) && request instanceof HttpServletRequest) {
+			localeString = ((HttpServletRequest) request).getHeader(RequestUtil.HEADER_ACCEPT_LANGUAGE);
+			if (!StringUtil.isEmpty(localeString)) {
+				LOGGER.info("Found locale parameter in header: " + localeString);
+			}
+		}
+
 		if (!StringUtil.isEmpty(localeString)) {
 			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(localeString);
-			if (locale == null)
+			if (locale == null) {
 				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: " + localeString);
-			else
+			} else {
 				iwc.setCurrentLocale(locale);
+			}
 		}
 	}
 
