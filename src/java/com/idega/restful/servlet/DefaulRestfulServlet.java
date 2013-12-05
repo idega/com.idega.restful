@@ -17,8 +17,10 @@ import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
+import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.RequestUtil;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.WebApplication;
@@ -76,6 +78,8 @@ public class DefaulRestfulServlet extends SpringServlet {
 		}
 
 		if (!StringUtil.isEmpty(localeString)) {
+			localeString = StringHandler.replace(localeString, CoreConstants.MINUS, CoreConstants.UNDER);
+
 			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(localeString);
 			if (locale == null) {
 				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: " + localeString);
