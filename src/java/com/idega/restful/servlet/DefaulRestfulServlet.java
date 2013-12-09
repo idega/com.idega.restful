@@ -68,6 +68,8 @@ public class DefaulRestfulServlet extends SpringServlet {
 			iwc = new IWContext((HttpServletRequest) request, (HttpServletResponse) response, getServletContext());
 		}
 
+		String requestURI = iwc.getRequestURI();
+
 		//	Checking if locale's parameter is provided
 		String localeString = request.getParameter(LocaleSwitcher.languageParameterString);
 
@@ -75,7 +77,7 @@ public class DefaulRestfulServlet extends SpringServlet {
 		if (StringUtil.isEmpty(localeString) && request instanceof HttpServletRequest) {
 			localeString = ((HttpServletRequest) request).getHeader(RequestUtil.HEADER_ACCEPT_LANGUAGE);
 			if (!StringUtil.isEmpty(localeString)) {
-				LOGGER.info("Found locale parameter in header: " + localeString);
+				LOGGER.info("Found locale parameter in header: '" + localeString + "' for request: " + requestURI);
 			}
 		}
 
@@ -84,7 +86,8 @@ public class DefaulRestfulServlet extends SpringServlet {
 
 			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(localeString);
 			if (locale == null) {
-				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: " + localeString);
+				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: '" + localeString + "' for request: "
+						+ requestURI);
 			} else {
 				String language = locale.getLanguage();
 				if (!Locale.ENGLISH.getLanguage().equals(language) && StringUtil.isEmpty(locale.getCountry())) {
@@ -92,10 +95,12 @@ public class DefaulRestfulServlet extends SpringServlet {
 					List<Locale> localesWithCountry = ICLocaleBusiness.getLocalesForLanguage(language);
 					if (!ListUtil.isEmpty(localesWithCountry)) {
 						locale = localesWithCountry.get(0);
-						LOGGER.info("Found locale with country (" + locale + ") for provided language: " + language);
 					}
+				} else if (Locale.ENGLISH.getLanguage().equals(language) && !StringUtil.isEmpty(locale.getCountry())) {
+					locale = Locale.ENGLISH;
 				}
 
+				LOGGER.info("Using locale '" + locale + "' for request: " + requestURI);
 				iwc.setCurrentLocale(locale);
 			}
 		}
