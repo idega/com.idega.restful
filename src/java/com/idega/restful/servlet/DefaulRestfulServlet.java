@@ -2,6 +2,7 @@ package com.idega.restful.servlet;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,7 @@ import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.ListUtil;
 import com.idega.util.RequestUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
@@ -84,6 +86,16 @@ public class DefaulRestfulServlet extends SpringServlet {
 			if (locale == null) {
 				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: " + localeString);
 			} else {
+				String language = locale.getLanguage();
+				if (!Locale.ENGLISH.getLanguage().equals(language) && StringUtil.isEmpty(locale.getCountry())) {
+					//	Locale is not English and without country, trying to find country for given language
+					List<Locale> localesWithCountry = ICLocaleBusiness.getLocalesForLanguage(language);
+					if (!ListUtil.isEmpty(localesWithCountry)) {
+						locale = localesWithCountry.get(0);
+						LOGGER.info("Found locale with country (" + locale + ") for provided language: " + language);
+					}
+				}
+
 				iwc.setCurrentLocale(locale);
 			}
 		}
