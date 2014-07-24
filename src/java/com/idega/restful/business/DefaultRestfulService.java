@@ -89,7 +89,7 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	}
 
 	protected Response getOKResponse(Serializable message, AdvancedProperty... headers) {
-		return getResponse(Response.Status.OK, message);
+		return getResponse(Response.Status.OK, message, headers);
 	}
 	protected <E extends Serializable> Response getOKResponse(List<E> entities) {
 		Serializable message = ListUtil.isEmpty(entities) ? new ArrayList<E>(0) : new ArrayList<E>(entities);
@@ -97,11 +97,15 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	}
 
 	protected Response getBadRequestResponse(Serializable message, AdvancedProperty... headers) {
-		return getResponse(Response.Status.BAD_REQUEST, message);
+		return getResponse(Response.Status.BAD_REQUEST, message, headers);
 	}
 
 	protected Response getInternalServerErrorResponse(Serializable message, AdvancedProperty... headers) {
-		return getResponse(Response.Status.INTERNAL_SERVER_ERROR, message);
+		return getResponse(Response.Status.INTERNAL_SERVER_ERROR, message, headers);
+	}
+
+	protected Response getUnauthorizedResponse(Serializable message, AdvancedProperty... headers) {
+		return getResponse(Response.Status.UNAUTHORIZED, message, headers);
 	}
 
     protected String getJSON(Serializable object) {
