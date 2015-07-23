@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.localisation.business.LocaleSwitcher;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
 import com.idega.util.CoreConstants;
@@ -76,15 +77,13 @@ public class DefaulRestfulServlet extends SpringServlet {
 			localeString = ((HttpServletRequest) request).getHeader(RequestUtil.HEADER_ACCEPT_LANGUAGE);
 		}
 
+		Locale locale = null;
 		//	Making sure locale with language and country will be used
 		if (!StringUtil.isEmpty(localeString)) {
 			localeString = StringHandler.replace(localeString, CoreConstants.MINUS, CoreConstants.UNDER);
 
-			Locale locale = ICLocaleBusiness.getLocaleFromLocaleString(localeString);
-			if (locale == null) {
-				Logger.getLogger(getClass().getName()).warning("Unable to resolve locale from provided value: '" + localeString + "' for request: "
-						+ iwc.getRequestURI() + ", session ID: " + iwc.getSessionId());
-			} else {
+			locale = ICLocaleBusiness.getLocaleFromLocaleString(localeString);
+			if (locale != null) {
 				String language = locale.getLanguage();
 				if (!Locale.ENGLISH.getLanguage().equals(language) && StringUtil.isEmpty(locale.getCountry())) {
 					//	Locale is not English and without country, trying to find country for given language
@@ -95,10 +94,11 @@ public class DefaulRestfulServlet extends SpringServlet {
 				} else if (Locale.ENGLISH.getLanguage().equals(language) && !StringUtil.isEmpty(locale.getCountry())) {
 					locale = Locale.ENGLISH;
 				}
-
-				iwc.setCurrentLocale(locale);
 			}
 		}
+
+		locale = locale == null ? IWMainApplication.getDefaultIWMainApplication().getDefaultLocale() : locale;
+		iwc.setCurrentLocale(locale);
 	}
 
 	@Override
