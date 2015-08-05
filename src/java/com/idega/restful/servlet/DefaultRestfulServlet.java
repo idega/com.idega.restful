@@ -29,11 +29,11 @@ import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.spi.container.WebApplication;
 import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 
-public class DefaulRestfulServlet extends SpringServlet {
+public class DefaultRestfulServlet extends SpringServlet {
 
 	private static final long serialVersionUID = 8737746855252117898L;
 
-	private static final Logger LOGGER = Logger.getLogger(DefaulRestfulServlet.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DefaultRestfulServlet.class.getName());
 
 	@Override
 	protected void initiate(ResourceConfig rc, WebApplication wa) {
