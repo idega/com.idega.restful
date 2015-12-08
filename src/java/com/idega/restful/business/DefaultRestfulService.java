@@ -104,6 +104,10 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 		return getResponse(Response.Status.INTERNAL_SERVER_ERROR, message, headers);
 	}
 
+	protected Response getServiceUnavailableResponse(Serializable message, AdvancedProperty... headers) {
+		return getResponse(Response.Status.SERVICE_UNAVAILABLE, message, headers);
+	}
+
 	protected Response getUnauthorizedResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.UNAUTHORIZED, message, headers);
 	}
