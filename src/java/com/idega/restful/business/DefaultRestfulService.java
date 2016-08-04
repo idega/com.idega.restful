@@ -28,6 +28,7 @@ import com.idega.user.business.StandardGroup;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
 import com.idega.util.ArrayUtil;
+import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
@@ -109,6 +110,11 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	}
 
 	protected Response getUnauthorizedResponse(Serializable message, AdvancedProperty... headers) {
+		return getResponse(Response.Status.UNAUTHORIZED, message, headers);
+	}
+
+	protected Response getUnauthorizedResponse(Serializable message, String path, String method, AdvancedProperty... headers) {
+		message = message.toString().concat(". Path: ").concat(path).concat(method.startsWith(CoreConstants.SLASH) ? method : CoreConstants.SLASH.concat(method));
 		return getResponse(Response.Status.UNAUTHORIZED, message, headers);
 	}
 
