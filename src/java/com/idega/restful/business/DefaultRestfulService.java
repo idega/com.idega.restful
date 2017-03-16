@@ -1,5 +1,7 @@
 package com.idega.restful.business;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +11,10 @@ import java.util.logging.Level;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,14 +76,35 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	protected Response getResponse(int statusCode, Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.fromStatusCode(statusCode), message, headers);
 	}
-	protected Response getResponse(Response.Status status, Serializable message, AdvancedProperty... headers) {
+	protected Response getResponse(Response.Status status, Object data, AdvancedProperty... headers) {
 		ResponseBuilder responseBuilder = Response.status(status.getStatusCode());
-		responseBuilder = responseBuilder.entity(getJSON(message));
+
+		if (data instanceof byte[]) {
+
+			StreamingOutput stream = new StreamingOutput() {
+
+				@Override
+				public void write(OutputStream output) throws IOException, WebApplicationException {
+					try {
+						output.write((byte[]) data);
+					} catch (Exception e) {
+						throw new WebApplicationException(e);
+					}
+				}
+
+		    };
+
+		    responseBuilder = Response.ok(stream);
+		} else if (data instanceof Serializable) {
+			responseBuilder = responseBuilder.entity(getJSON((Serializable) data));
+		}
+
 		if (!ArrayUtil.isEmpty(headers)) {
 			for (AdvancedProperty header: headers) {
 				responseBuilder.header(header.getName(), header.getValue());
 			}
 		}
+
 		Response response = responseBuilder.build();
 		return response;
 	}
@@ -89,6 +114,9 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 		return getResponse(status, message, headers);
 	}
 
+	protected Response getOKResponse(byte[] bytes, AdvancedProperty... headers) {
+		return getResponse(Response.Status.OK, bytes, headers);
+	}
 	protected Response getOKResponse(Serializable message, AdvancedProperty... headers) {
 		return getResponse(Response.Status.OK, message, headers);
 	}
