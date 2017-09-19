@@ -28,75 +28,29 @@
             <groupId>com.idega.block.platform</groupId>
             <artifactId>com.idega.core</artifactId>
         </dependency>
-        
-        <!-- GSON from Google -->
+
+		<!-- GSON from Google -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!-- RESTful Web Services -->
-        <dependency>
-	    	<groupId>javax.ws.rs</groupId>
-	    	<artifactId>jsr311-api</artifactId>
-	    	<version>${javax.ws.rs-version}</version>
-	    </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-server</artifactId>
-            <version>${com.sun.jersey-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-servlet</artifactId>
-            <version>${com.sun.jersey-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-            <version>${com.sun.jersey-version}</version>
-        </dependency>
-        <dependency>
-		    <groupId>com.sun.jersey.contribs</groupId>
-		    <artifactId>jersey-multipart</artifactId>
-		    <version>${com.sun.jersey-version}</version>
-		</dependency>
-		<dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-            <version>${com.sun.jersey-version}</version>
-        </dependency>
-        <dependency>
-	        <groupId>com.sun.jersey.contribs</groupId>
-	        <artifactId>jersey-spring</artifactId>
-	        <version>${com.sun.jersey-version}</version>
-	        <exclusions>
-		       <exclusion>
-		           <groupId>org.springframework</groupId>
-		           <artifactId>spring</artifactId>
-		       </exclusion>
-		       <exclusion>
-		           <groupId>org.springframework</groupId>
-		           <artifactId>spring-core</artifactId>
-		       </exclusion>
-		       <exclusion>
-		           <groupId>org.springframework</groupId>
-		           <artifactId>spring-web</artifactId>
-		       </exclusion>
-		       <exclusion>
-		           <groupId>org.springframework</groupId>
-		           <artifactId>spring-beans</artifactId>
-		       </exclusion>
-		       <exclusion>
-		           <groupId>org.springframework</groupId>
-		           <artifactId>spring-context</artifactId>
-		       </exclusion>
-	           <exclusion>
-	               <groupId>org.springframework</groupId>
-	               <artifactId>spring-aop</artifactId>
-	           </exclusion>
-	        </exclusions>
+	    <!-- RESTful Web Services -->
+    	<dependency>
+    		<groupId>org.glassfish.jersey.containers</groupId>
+    		<artifactId>jersey-container-servlet</artifactId>
+    		<version>2.17</version>
     	</dependency>
+    	<dependency> 
+    		<groupId>org.glassfish.jersey.media</groupId>
+    		<artifactId>jersey-media-json-jackson</artifactId>
+    		<version>2.17</version>
+    	</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+			<version>2.17</version>
+		</dependency>
     </dependencies>
 
     <repositories>

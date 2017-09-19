@@ -12,6 +12,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+
+import org.glassfish.jersey.client.ClientResponse;
 
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.idegaweb.IWMainApplication;
@@ -21,12 +28,6 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.URIUtil;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 public class ConnectionUtil {
 
@@ -69,20 +70,22 @@ public class ConnectionUtil {
 			    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 			} catch (Exception e) {}
 
-			ClientConfig config = new DefaultClientConfig();
-			config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
-					new HostnameVerifier() {
-						@Override
-						public boolean verify( String s, SSLSession sslSession ) {
-							return true;
-						}
-					}, sc
-				)
-			);
-			Client client = Client.create(config);
-			return client;
+			ClientBuilder clientBuilder = ClientBuilder.newBuilder();
+	        try {
+	            clientBuilder.sslContext(sc);
+	            clientBuilder.hostnameVerifier(new HostnameVerifier() {
+	                @Override
+	                public boolean verify(String hostname, SSLSession session) {
+	                    return true;
+	                }
+	            });
+	        } catch (Exception e) {
+	            throw new RuntimeException(e);
+	        }
+
+			return clientBuilder.build();
 		} else {
-			return new Client();
+			return ClientBuilder.newClient();
 		}
 	}
 
@@ -112,7 +115,7 @@ public class ConnectionUtil {
 				uri = uriUtil.getUri();
 			}
 
-			WebResource.Builder builder = getBackendResource(uri, length);
+			Builder builder = getBackendResource(uri, length);
 			if (builder == null) {
 				return null;
 			}
@@ -123,11 +126,7 @@ public class ConnectionUtil {
 				}
 			}
 
-			ClientResponse response = builder
-							.type(type)
-							.method(method, ClientResponse.class, data);
-
-			return response;
+			return builder.method(method, Entity.entity(data, type), ClientResponse.class);
 		} catch (Exception e) {
 			LOGGER.log(Level.WARNING, "Error calling RESTful WS at " + uri + ". Header params: " + headerParams + ", path params: " +
 					pathParams + ", data: " + data + ", query params: " + queryParams, e);
@@ -135,16 +134,16 @@ public class ConnectionUtil {
 		return null;
 	}
 
-	private final WebResource.Builder getBackendResource(String url, Long contentLength) throws Exception {
+	private final Builder getBackendResource(String url, Long contentLength) throws Exception {
 		if (StringUtil.isEmpty(url)) {
 			return null;
 		}
 
 		Client client = getClient(url);
-		WebResource webResource = client.resource(url);
-		WebResource.Builder builder = webResource.getRequestBuilder();
+		WebTarget target = client.target(url);
+		Builder builder = target.request();
 		if (contentLength != null)
-			builder = webResource.header(CoreConstants.PARAMETER_CONTENT_LENGTH, String.valueOf(contentLength));
+			builder = builder.header(CoreConstants.PARAMETER_CONTENT_LENGTH, String.valueOf(contentLength));
 		return builder;
 	}
 
