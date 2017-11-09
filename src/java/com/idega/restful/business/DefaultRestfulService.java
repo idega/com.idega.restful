@@ -3,7 +3,9 @@ package com.idega.restful.business;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.gson.Gson;
 import com.idega.builder.bean.AdvancedProperty;
@@ -247,4 +250,50 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
     	return Boolean.FALSE;
     }
+
+    private String getCurrentMethodName() {
+		try {
+			final StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+			if (ArrayUtil.isEmpty(stElements) || stElements.length < 4) {
+				getLogger().warning("Stack trace is not available");
+				return null;
+			}
+
+			StackTraceElement ste = stElements[3];
+			return ste.getMethodName();
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error getting current method's name", e);
+		}
+		return null;
+	}
+
+	protected <T> T execute(Object target, Object... args) {
+		if (target == null) {
+			return null;
+		}
+
+		String methodName = null;
+		try {
+			methodName = getCurrentMethodName();
+
+			Method[] methods = target.getClass().getMethods();
+			if (ArrayUtil.isEmpty(methods)) {
+				return null;
+			}
+
+			for (Method m: methods) {
+				if (methodName.equals(m.getName())) {
+					@SuppressWarnings("unchecked")
+					T result = (T) ReflectionUtils.invokeMethod(m, target, args);
+					return result;
+				}
+			}
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error executing method '" + methodName + "' at " + target +
+					(ArrayUtil.isEmpty(args) ? CoreConstants.EMPTY : " with arguments: " + Arrays.asList(args)), e);
+		}
+
+		return null;
+	}
+
 }
