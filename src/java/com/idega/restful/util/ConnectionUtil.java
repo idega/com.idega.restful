@@ -24,7 +24,6 @@ import com.idega.util.URIUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
@@ -45,44 +44,52 @@ public class ConnectionUtil {
 				IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("rest.accept_all_cert", Boolean.FALSE);
 	}
 
+	private static Client ACCEPTING_EVERYTHING_CLIENT = null;
+
 	public Client getClient(String url) {
+		return getClient(url, null);
+	}
+
+	public Client getClient(String url, DefaultClientConfig config) {
 		if (isAllowedToAcceptAllCertificates(url)) {
-			//	Create a trust manager that does not validate certificate chains
-			TrustManager[] trustAllCerts = new TrustManager[] {
-				new X509TrustManager() {
-				    @Override
-					public X509Certificate[] getAcceptedIssuers() {
-				    	return null;
-				    }
-				    @Override
-					public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-				    @Override
-					public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-				}
-			};
+			if (ACCEPTING_EVERYTHING_CLIENT == null) {
+				//	Create a trust manager that does not validate certificate chains
+				TrustManager[] trustAllCerts = new TrustManager[] {
+					new X509TrustManager() {
+					    @Override
+						public X509Certificate[] getAcceptedIssuers() {
+					    	return null;
+					    }
+					    @Override
+						public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+					    @Override
+						public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+					}
+				};
 
-			//	Install the all-trusting trust manager
-			SSLContext sc = null;
-			try {
-			    sc = SSLContext.getInstance("TLS");
-			    sc.init(null, trustAllCerts, new SecureRandom());
-			    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-			} catch (Exception e) {}
+				//	Install the all-trusting trust manager
+				SSLContext sc = null;
+				try {
+				    sc = SSLContext.getInstance("TLS");
+				    sc.init(null, trustAllCerts, new SecureRandom());
+				    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+				} catch (Exception e) {}
 
-			ClientConfig config = new DefaultClientConfig();
-			config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
-					new HostnameVerifier() {
-						@Override
-						public boolean verify( String s, SSLSession sslSession ) {
-							return true;
-						}
-					}, sc
-				)
-			);
-			Client client = Client.create(config);
-			return client;
+				config = config == null ? new DefaultClientConfig() : config;
+				config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
+						new HostnameVerifier() {
+							@Override
+							public boolean verify( String s, SSLSession sslSession ) {
+								return true;
+							}
+						}, sc
+					)
+				);
+				ACCEPTING_EVERYTHING_CLIENT = Client.create(config);
+			}
+			return ACCEPTING_EVERYTHING_CLIENT;
 		} else {
-			return new Client();
+			return config == null ? new Client() : Client.create(config);
 		}
 	}
 
