@@ -136,7 +136,7 @@ public class ConnectionUtil {
 
 			return response;
 		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Error calling RESTful WS at " + uri + ". Header params: " + headerParams + ", path params: " +
+			LOGGER.log(Level.WARNING, "Error calling RESTful WS at " + uri + ", type " + type + ", method " + method + ". Header params: " + headerParams + ", path params: " +
 					pathParams + ", data: " + data + ", query params: " + queryParams, e);
 		}
 		return null;
@@ -150,8 +150,9 @@ public class ConnectionUtil {
 		Client client = getClient(url);
 		WebResource webResource = client.resource(url);
 		WebResource.Builder builder = webResource.getRequestBuilder();
-		if (contentLength != null)
+		if (contentLength != null) {
 			builder = webResource.header(CoreConstants.PARAMETER_CONTENT_LENGTH, String.valueOf(contentLength));
+		}
 		return builder;
 	}
 
