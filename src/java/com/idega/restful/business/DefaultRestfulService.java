@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
+import javax.servlet.http.Cookie;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
@@ -108,6 +110,18 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 			}
 		}
 
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc != null) {
+			Cookie[] cookies = iwc.getCookies();
+			if (!ArrayUtil.isEmpty(cookies)) {
+				List<NewCookie> newCookies = new ArrayList<>();
+				for (Cookie cookie: cookies) {
+					newCookies.add(new NewCookie(cookie.getName(), cookie.getValue()));
+				}
+				responseBuilder.cookie(ArrayUtil.convertListToArray(newCookies));
+			}
+		}
+
 		Response response = responseBuilder.build();
 		return response;
 	}
@@ -163,14 +177,16 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 	private StandardGroup standardGroup;
 
 	private StandardGroup getStandardGroup() {
-		if (standardGroup == null)
+		if (standardGroup == null) {
 			ELUtil.getInstance().autowire(this);
+		}
 		return standardGroup;
 	}
 
     protected User getUser(String userId, boolean createIfDoesNotExist) {
-    	if (StringUtil.isEmpty(userId))
-    		return null;
+    	if (StringUtil.isEmpty(userId)) {
+			return null;
+		}
 
     	User user = null;
     	UserBusiness userBusiness = getServiceInstance(UserBusiness.class);
