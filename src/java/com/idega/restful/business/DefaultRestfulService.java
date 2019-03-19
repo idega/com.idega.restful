@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.logging.Level;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
@@ -33,6 +35,7 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.restful.RestfulConstants;
+import com.idega.servlet.filter.RequestResponseProvider;
 import com.idega.user.business.StandardGroup;
 import com.idega.user.business.UserBusiness;
 import com.idega.user.data.User;
@@ -110,16 +113,41 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 			}
 		}
 
+		boolean jSessionCookieSet = false;
+		String jSessionIDName = "JSESSIONID";
 		IWContext iwc = CoreUtil.getIWContext();
+		List<NewCookie> newCookies = new ArrayList<>();
 		if (iwc != null) {
 			Cookie[] cookies = iwc.getCookies();
 			if (!ArrayUtil.isEmpty(cookies)) {
-				List<NewCookie> newCookies = new ArrayList<>();
 				for (Cookie cookie: cookies) {
-					newCookies.add(new NewCookie(cookie.getName(), cookie.getValue()));
+					String name = cookie.getName();
+					if (!jSessionCookieSet && name != null) {
+						jSessionCookieSet = name.equals(jSessionIDName);
+					}
+					newCookies.add(new NewCookie(name, cookie.getValue()));
 				}
-				responseBuilder.cookie(ArrayUtil.convertListToArray(newCookies));
 			}
+		}
+		if (!jSessionCookieSet) {
+			try {
+				RequestResponseProvider rrProvider = ELUtil.getInstance().getBean(RequestResponseProvider.class);
+				HttpServletRequest request = rrProvider.getRequest();
+				if (request != null) {
+					HttpSession session = request.getSession();
+					if (session != null) {
+						String sessionId = session.getId();
+						if (StringUtil.isEmpty(sessionId)) {
+
+						} else {
+							newCookies.add(new NewCookie(jSessionIDName, sessionId));
+						}
+					}
+				}
+			} catch (Exception e) {}
+		}
+		if (!ListUtil.isEmpty(newCookies)) {
+			responseBuilder.cookie(ArrayUtil.convertListToArray(newCookies));
 		}
 
 		Response response = responseBuilder.build();
