@@ -1,7 +1,5 @@
 package com.idega.restful.business;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,17 +10,16 @@ import javax.xml.bind.JAXBException;
 
 import org.springframework.stereotype.Service;
 
+import com.idega.restful.bean.JAXBNatural;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
 
 @Service
 @Provider
 public class JAXBContextResolver implements ContextResolver<JAXBContext> {
-	private Set<Class<?>> types = new HashSet<Class<?>>();
-	
     @Override
     public JAXBContext getContext(Class<?> objectType) {
-    	if(!types.contains(objectType)) {
+    	if (!JAXBNatural.class.isAssignableFrom(objectType)) {
     		return null;
     	}
     	try {
@@ -38,9 +35,5 @@ public class JAXBContextResolver implements ContextResolver<JAXBContext> {
 			);
 		}
     	return null;
-    }
-    
-    public void addContext(Class<?> type) throws JAXBException{
-    	types.add(type);
     }
 }
