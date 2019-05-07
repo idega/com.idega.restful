@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Provider
 public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwable> {
-    public Response toResponse(Throwable exception) {
+    @Override
+	public Response toResponse(Throwable exception) {
     	Logger.getLogger(ExceptionMapper.class.getName()).log(
     			Level.WARNING, 
     			"Exception ", 
@@ -22,9 +23,7 @@ public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwabl
     		return getExceptionResponse((WebApplicationException) exception);
     	}
     	
-    	InternalServerError error = new InternalServerError(
-    			"Unexpected error encountered"
-    	);
+    	InternalServerError error = new InternalServerError();
     	return getExceptionResponse(error);
     }
     

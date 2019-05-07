@@ -339,5 +339,12 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
 		return null;
 	}
+	
+	protected boolean parseFlag(String flag) {
+		return (
+				(flag == null) 
+				|| ("false".equalsIgnoreCase(flag))
+		) ? false : true;
+	}
 
 }
