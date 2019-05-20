@@ -13,6 +13,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Response.Status;
 
 import com.idega.core.localisation.business.ICLocaleBusiness;
 import com.idega.core.localisation.business.LocaleSwitcher;
@@ -48,7 +49,10 @@ public class DefaultRestfulServlet extends SpringServlet {
 	@Override
 	public int service(URI baseUri, URI requestUri, HttpServletRequest request,	HttpServletResponse response) throws ServletException, IOException {
 		initializeContext(request, response);
-		return super.service(baseUri, requestUri, request, response);
+		try {
+			return super.service(baseUri, requestUri, request, response);
+		} catch (Exception e) {}
+		return Status.INTERNAL_SERVER_ERROR.getStatusCode();
 	}
 
 	@Override
