@@ -21,7 +21,6 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
 import com.idega.util.CoreConstants;
-import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.RequestUtil;
 import com.idega.util.StringHandler;
@@ -68,10 +67,7 @@ public class DefaultRestfulServlet extends SpringServlet {
 	}
 
 	private void initializeContext(ServletRequest request, ServletResponse response) {
-		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
-			iwc = new IWContext((HttpServletRequest) request, (HttpServletResponse) response, getServletContext());
-		}
+		IWContext iwc = new IWContext((HttpServletRequest) request, (HttpServletResponse) response, getServletContext());
 
 		//	Checking if locale's parameter is provided
 		String localeString = request.getParameter(LocaleSwitcher.languageParameterString);
