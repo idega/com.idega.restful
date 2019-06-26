@@ -271,12 +271,11 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
     	return user;
 	}
 
-    protected boolean logInUser(User user) {
+    protected boolean logInUser(IWContext iwc, User user) {
     	if (user == null) {
     		return Boolean.FALSE;
     	}
 
-    	IWContext iwc = CoreUtil.getIWContext();
     	if (iwc == null) {
     		return Boolean.FALSE;
     	}
@@ -286,8 +285,7 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
     	}
 
     	try {
-			return LoginBusinessBean.getDefaultLoginBusinessBean()
-					.logInByPersonalID(CoreUtil.getIWContext(), user.getPersonalID());
+			return LoginBusinessBean.getDefaultLoginBusinessBean().logInByPersonalID(iwc, user.getPersonalID());
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Unable to login: ", e);
 		}
@@ -339,10 +337,10 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 
 		return null;
 	}
-	
+
 	protected boolean parseFlag(String flag) {
 		return (
-				(flag == null) 
+				(flag == null)
 				|| ("false".equalsIgnoreCase(flag))
 		) ? false : true;
 	}
