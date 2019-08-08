@@ -14,11 +14,7 @@ import org.springframework.stereotype.Service;
 public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwable> {
     @Override
 	public Response toResponse(Throwable exception) {
-    	Logger.getLogger(ExceptionMapper.class.getName()).log(
-    			Level.WARNING, 
-    			"Exception ", 
-    			exception
-    	);
+    	logException(exception);
     	if(exception instanceof WebApplicationException) {
     		return getExceptionResponse((WebApplicationException) exception);
     	}
@@ -29,6 +25,18 @@ public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwabl
     
     private Response getExceptionResponse(WebApplicationException wex) {
     	return wex.getResponse(); 
+    }
+    
+    private void logException(Throwable exception) {
+    	Logger.getLogger(ExceptionMapper.class.getName()).log(
+    			Level.WARNING, 
+    			"Exception ", 
+    			exception
+    	);
+    	if(exception instanceof RestException) {
+    		RestException restException = (RestException) exception;
+    		restException.setLogged(true);
+    	}
     }
 
 }
