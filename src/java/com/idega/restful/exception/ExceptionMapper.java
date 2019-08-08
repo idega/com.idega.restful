@@ -30,7 +30,7 @@ public class ExceptionMapper implements javax.ws.rs.ext.ExceptionMapper<Throwabl
     private void logException(Throwable exception) {
     	Logger.getLogger(ExceptionMapper.class.getName()).log(
     			Level.WARNING, 
-    			"Exception ", 
+    			"Exception in ws", 
     			exception
     	);
     	if(exception instanceof RestException) {

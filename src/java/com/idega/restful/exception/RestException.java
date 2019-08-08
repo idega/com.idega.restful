@@ -15,6 +15,8 @@ public class RestException extends WebApplicationException{
 	
 	private boolean logged = false;
 	
+	private String message = null;
+	
 	public RestException(String message, int status){
 		super(
 				Response.status(status)
@@ -22,6 +24,7 @@ public class RestException extends WebApplicationException{
 				.entity(getInfo(message))
 				.build()
 		);
+		this.message = message;
 	}
 	
 	private static Object getInfo(String message) {
@@ -66,5 +69,10 @@ public class RestException extends WebApplicationException{
 			return response;
 		}
 		return super.getResponse();
+	}
+
+	@Override
+	public String getMessage() {
+		return this.message;
 	}
 }
