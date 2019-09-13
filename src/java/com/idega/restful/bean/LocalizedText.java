@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LocalizedText implements JAXBNatural {
+public class LocalizedText implements JAXBNatural, Cloneable {
 	
 	private String key;
 	private String defaultValue;
@@ -31,6 +31,11 @@ public class LocalizedText implements JAXBNatural {
 	}
 	public void setDefaultValue(String defaultValue) {
 		this.defaultValue = defaultValue;
+	}
+
+	@Override
+	public LocalizedText clone() throws CloneNotSupportedException {
+		return (LocalizedText)super.clone();
 	}
 
 }
