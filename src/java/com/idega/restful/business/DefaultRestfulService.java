@@ -121,6 +121,10 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
 			Cookie[] cookies = iwc.getCookies();
 			if (!ArrayUtil.isEmpty(cookies)) {
 				for (Cookie cookie: cookies) {
+					if (cookie == null) {
+						continue;
+					}
+
 					String name = cookie.getName();
 					if (!jSessionCookieSet && name != null) {
 						jSessionCookieSet = name.equals(jSessionIDName);
