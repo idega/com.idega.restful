@@ -289,9 +289,15 @@ public abstract class DefaultRestfulService extends DefaultSpringBean {
     	}
 
     	try {
-			return LoginBusinessBean.getDefaultLoginBusinessBean().logInByPersonalID(iwc, user.getPersonalID());
+    		LoginBusinessBean loginBusiness = LoginBusinessBean.getLoginBusinessBean(iwc);
+    		String personalId = user.getPersonalID();
+    		if (StringUtil.isEmpty(personalId)) {
+    			return loginBusiness.logInUser(iwc.getRequest(), getUser(user));
+    		} else {
+    			return loginBusiness.logInByPersonalID(iwc, personalId);
+    		}
 		} catch (Exception e) {
-			getLogger().log(Level.WARNING, "Unable to login: ", e);
+			getLogger().log(Level.WARNING, "Unable to login user " + user, e);
 		}
 
     	return Boolean.FALSE;
