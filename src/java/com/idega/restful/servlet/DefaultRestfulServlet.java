@@ -11,6 +11,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
@@ -20,6 +21,7 @@ import com.idega.core.localisation.business.LocaleSwitcher;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.restful.spring.container.IWSpringComponentProviderFactory;
+import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
 import com.idega.util.RequestUtil;
@@ -75,6 +77,23 @@ public class DefaultRestfulServlet extends SpringServlet {
 		//	Checking if locale's parameter is provided in header
 		if (StringUtil.isEmpty(localeString) && request instanceof HttpServletRequest) {
 			localeString = ((HttpServletRequest) request).getHeader(RequestUtil.HEADER_ACCEPT_LANGUAGE);
+		}
+
+		if (StringUtil.isEmpty(localeString) && request instanceof HttpServletRequest) {
+			Cookie[] cookies = ((HttpServletRequest) request).getCookies();
+			if (!ArrayUtil.isEmpty(cookies)) {
+				String localeCookie = "currentLocale";
+				for (Cookie cookie: cookies) {
+					String name = cookie == null ? null : cookie.getName();
+					if (StringUtil.isEmpty(name)) {
+						continue;
+					}
+
+					if (localeCookie.equals(name)) {
+						localeString = cookie.getValue();
+					}
+				}
+			}
 		}
 
 		Locale locale = null;
