@@ -68,7 +68,7 @@ public class DefaultRestfulServlet extends SpringServlet {
 		super.doFilter(request, response, chain);
 	}
 
-	private void initializeContext(ServletRequest request, ServletResponse response) {
+	protected void initializeContext(ServletRequest request, ServletResponse response) {
 		IWContext iwc = new IWContext((HttpServletRequest) request, (HttpServletResponse) response, getServletContext());
 
 		//	Checking if locale's parameter is provided
