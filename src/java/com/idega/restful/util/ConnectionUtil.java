@@ -114,7 +114,12 @@ public class ConnectionUtil {
 			if (!ArrayUtil.isEmpty(queryParams)) {
 				URIUtil uriUtil = new URIUtil(uri);
 				for (AdvancedProperty queryParam: queryParams) {
-					uriUtil.setParameter(queryParam.getName(), queryParam.getValue().toString());
+					String value = queryParam.getValue();
+					if (StringUtil.isEmpty(value)) {
+						continue;
+					}
+
+					uriUtil.setParameter(queryParam.getName(), value);
 				}
 				uri = uriUtil.getUri();
 			}
