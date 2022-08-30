@@ -41,7 +41,7 @@ public class ConnectionUtil {
 	private boolean isAllowedToAcceptAllCertificates(String url) {
 		return !StringUtil.isEmpty(url) &&
 				url.startsWith("https") &&
-				IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("rest.accept_all_cert", Boolean.FALSE);
+				IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("rest.accept_all_cert", Boolean.TRUE);
 	}
 
 	private static Client ACCEPTING_EVERYTHING_CLIENT = null;
