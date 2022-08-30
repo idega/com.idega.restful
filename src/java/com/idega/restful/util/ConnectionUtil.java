@@ -70,7 +70,7 @@ public class ConnectionUtil {
 				//	Install the all-trusting trust manager
 				SSLContext sc = null;
 				try {
-				    sc = SSLContext.getInstance("TLS");
+				    sc = SSLContext.getInstance("TLSv1.2");
 				    sc.init(null, trustAllCerts, new SecureRandom());
 				    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 				} catch (Exception e) {}
@@ -79,7 +79,7 @@ public class ConnectionUtil {
 				config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(
 						new HostnameVerifier() {
 							@Override
-							public boolean verify( String s, SSLSession sslSession ) {
+							public boolean verify(String s, SSLSession sslSession) {
 								return true;
 							}
 						}, sc
@@ -93,6 +93,20 @@ public class ConnectionUtil {
 		}
 	}
 
+	/**
+	 * Returns response from remote syste
+	 *
+	 * @param <D> - type of result
+	 * @param uri - remote system
+	 * @param length - size of request (for POST)
+	 * @param type - content type
+	 * @param method - type of HTTP request (GET, POST etc.)
+	 * @param data - request
+	 * @param headerParams - parameters for header
+	 * @param pathParams - path parameters
+	 * @param queryParams - query parameters
+	 * @return
+	 */
 	public <D> ClientResponse getResponseFromREST(
 			String uri,
 			Long length,
