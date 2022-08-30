@@ -70,7 +70,7 @@ public class ConnectionUtil {
 				//	Install the all-trusting trust manager
 				SSLContext sc = null;
 				try {
-				    sc = SSLContext.getInstance("TLSv1.2");
+				    sc = SSLContext.getInstance(IWMainApplication.getDefaultIWMainApplication().getSettings().getProperty("rest.ssl_protocol", "TLSv1.2"));
 				    sc.init(null, trustAllCerts, new SecureRandom());
 				    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 				} catch (Exception e) {}
