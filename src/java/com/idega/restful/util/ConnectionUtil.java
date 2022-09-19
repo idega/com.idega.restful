@@ -1,8 +1,11 @@
 package com.idega.restful.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +24,7 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.URIUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -45,6 +49,28 @@ public class ConnectionUtil {
 	}
 
 	private static Client ACCEPTING_EVERYTHING_CLIENT = null;
+
+	public String getEncodedFormData(Map<String, String> params) throws UnsupportedEncodingException {
+		if (MapUtil.isEmpty(params)) {
+			return null;
+		}
+
+	    StringBuilder result = new StringBuilder();
+	    boolean first = true;
+	    for (Map.Entry<String, String> entry: params.entrySet()) {
+	        if (first) {
+	            first = false;
+	        } else {
+	            result.append(CoreConstants.AMP);
+	        }
+
+	        result.append(URLEncoder.encode(entry.getKey(), CoreConstants.ENCODING_UTF8));
+	        result.append(CoreConstants.EQ);
+	        result.append(URLEncoder.encode(entry.getValue(), CoreConstants.ENCODING_UTF8));
+	    }
+
+	    return result.toString();
+	}
 
 	public Client getClient(String url) {
 		return getClient(url, null);
