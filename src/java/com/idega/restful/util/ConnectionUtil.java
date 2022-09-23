@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,6 +50,15 @@ public class ConnectionUtil {
 	}
 
 	private static Client ACCEPTING_EVERYTHING_CLIENT = null;
+
+	public String getBasicAuthorization(String username, String password) throws Exception {
+		if (StringUtil.isEmpty(username) || StringUtil.isEmpty(password)) {
+			return null;
+		}
+
+		byte[] bytes = Base64.getEncoder().encode(username.concat(CoreConstants.COLON).concat(password).getBytes(CoreConstants.ENCODING_UTF8));
+		return "Basic ".concat(new String(bytes, CoreConstants.ENCODING_UTF8));
+	}
 
 	public String getEncodedFormData(Map<String, String> params) throws UnsupportedEncodingException {
 		if (MapUtil.isEmpty(params)) {
