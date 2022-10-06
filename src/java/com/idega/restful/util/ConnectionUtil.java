@@ -7,6 +7,7 @@ import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +37,8 @@ public class ConnectionUtil {
 
 	private static final Logger LOGGER = Logger.getLogger(ConnectionUtil.class.getName());
 	private static final ConnectionUtil instance = new ConnectionUtil();
+
+	private Map<String, Client> clients = new ConcurrentHashMap<>();
 
 	private ConnectionUtil() {}
 
@@ -83,7 +86,17 @@ public class ConnectionUtil {
 	}
 
 	public Client getClient(String url) {
-		return getClient(url, null);
+		boolean cacheClients = !StringUtil.isEmpty(url) && IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("platform.cache_ws_clients", true);
+		Client client = cacheClients ? clients.get(url) : null;
+		if (client != null) {
+			return client;
+		}
+
+		client = getClient(url, null);
+		if (cacheClients && client != null) {
+			clients.put(url, client);
+		}
+		return client;
 	}
 
 	public Client getClient(String url, DefaultClientConfig config) {
