@@ -167,6 +167,8 @@ public class ConnectionUtil {
 			AdvancedProperty... queryParams
 	) {
 		try {
+			String originalURL = uri;
+
 			if (!ListUtil.isEmpty(pathParams)) {
 				for (AdvancedProperty pathParam: pathParams) {
 					String pattern = CoreConstants.CURLY_BRACKET_LEFT + pathParam.getName() + CoreConstants.CURLY_BRACKET_RIGHT;
@@ -187,7 +189,7 @@ public class ConnectionUtil {
 				uri = uriUtil.getUri();
 			}
 
-			WebResource.Builder builder = getBackendResource(uri, length);
+			WebResource.Builder builder = getBackendResource(originalURL, uri, length);
 			if (builder == null) {
 				return null;
 			}
@@ -210,12 +212,12 @@ public class ConnectionUtil {
 		return null;
 	}
 
-	private final WebResource.Builder getBackendResource(String url, Long contentLength) throws Exception {
+	private final WebResource.Builder getBackendResource(String originalURL, String url, Long contentLength) throws Exception {
 		if (StringUtil.isEmpty(url)) {
 			return null;
 		}
 
-		Client client = getClient(url);
+		Client client = getClient(originalURL);
 		WebResource webResource = client.resource(url);
 		WebResource.Builder builder = webResource.getRequestBuilder();
 		if (contentLength != null) {
