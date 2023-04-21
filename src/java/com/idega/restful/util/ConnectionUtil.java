@@ -71,15 +71,21 @@ public class ConnectionUtil {
 	    StringBuilder result = new StringBuilder();
 	    boolean first = true;
 	    for (Map.Entry<String, String> entry: params.entrySet()) {
+	    	String key = entry.getKey();
+	        String value = entry.getValue();
+	        if (StringUtil.isEmpty(key) || StringUtil.isEmpty(value)) {
+	        	continue;
+	        }
+
 	        if (first) {
 	            first = false;
 	        } else {
 	            result.append(CoreConstants.AMP);
 	        }
 
-	        result.append(URLEncoder.encode(entry.getKey(), CoreConstants.ENCODING_UTF8));
+	        result.append(URLEncoder.encode(key, CoreConstants.ENCODING_UTF8));
 	        result.append(CoreConstants.EQ);
-	        result.append(URLEncoder.encode(entry.getValue(), CoreConstants.ENCODING_UTF8));
+	        result.append(URLEncoder.encode(value, CoreConstants.ENCODING_UTF8));
 	    }
 
 	    return result.toString();
