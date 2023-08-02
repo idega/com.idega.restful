@@ -30,6 +30,7 @@ import com.idega.util.datastructures.map.MapUtil;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
@@ -92,13 +93,17 @@ public class ConnectionUtil {
 	}
 
 	public Client getClient(String url) {
+		return getClient(url, -1, -1);
+	}
+
+	public Client getClient(String url, int connectTimeout, int readTimeout) {
 		boolean cacheClients = !StringUtil.isEmpty(url) && IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("platform.cache_ws_clients", true);
 		Client client = cacheClients ? clients.get(url) : null;
 		if (client != null) {
 			return client;
 		}
 
-		client = getClient(url, null);
+		client = getClient(url, null, connectTimeout, readTimeout);
 		if (cacheClients && client != null) {
 			clients.put(url, client);
 		}
@@ -106,6 +111,10 @@ public class ConnectionUtil {
 	}
 
 	public Client getClient(String url, DefaultClientConfig config) {
+		return getClient(url, config, -1, -1);
+	}
+
+	public Client getClient(String url, DefaultClientConfig config, int connectTimeout, int readTimeout) {
 		if (isAllowedToAcceptAllCertificates(url)) {
 			if (ACCEPTING_EVERYTHING_CLIENT == null) {
 				//	Create a trust manager that does not validate certificate chains
@@ -140,11 +149,28 @@ public class ConnectionUtil {
 						}, sc
 					)
 				);
+				setTimeout(config, connectTimeout, readTimeout);
 				ACCEPTING_EVERYTHING_CLIENT = Client.create(config);
 			}
 			return ACCEPTING_EVERYTHING_CLIENT;
-		} else {
-			return config == null ? new Client() : Client.create(config);
+		}
+
+		config = config == null ? new DefaultClientConfig() : config;
+		setTimeout(config, connectTimeout, readTimeout);
+		return Client.create(config);
+	}
+
+	private void setTimeout(DefaultClientConfig config, int connectTimeout, int readTimeout) {
+		if (connectTimeout <= 0 && readTimeout <= 0) {
+			return;
+		}
+
+		config = config == null ? new DefaultClientConfig() : config;
+		if (connectTimeout > 0) {
+			config.getProperties().put(ClientConfig.PROPERTY_CONNECT_TIMEOUT, connectTimeout);
+		}
+		if (readTimeout > 0) {
+			config.getProperties().put(ClientConfig.PROPERTY_READ_TIMEOUT, readTimeout);
 		}
 	}
 
@@ -172,6 +198,21 @@ public class ConnectionUtil {
 			List<AdvancedProperty> pathParams,
 			AdvancedProperty... queryParams
 	) {
+		return getResponseFromREST(uri, length, type, method, data, -1, -1, headerParams, pathParams, queryParams);
+	}
+
+	public <D> ClientResponse getResponseFromREST(
+			String uri,
+			Long length,
+			String type,
+			String method,
+			D data,
+			int connectTimeout,
+			int readTimeout,
+			List<AdvancedProperty> headerParams,
+			List<AdvancedProperty> pathParams,
+			AdvancedProperty... queryParams
+	) {
 		try {
 			String originalURL = uri;
 
@@ -195,7 +236,7 @@ public class ConnectionUtil {
 				uri = uriUtil.getUri();
 			}
 
-			WebResource.Builder builder = getBackendResource(originalURL, uri, length);
+			WebResource.Builder builder = getBackendResource(originalURL, uri, length, connectTimeout, readTimeout);
 			if (builder == null) {
 				return null;
 			}
@@ -218,12 +259,12 @@ public class ConnectionUtil {
 		return null;
 	}
 
-	private final WebResource.Builder getBackendResource(String originalURL, String url, Long contentLength) throws Exception {
+	private final WebResource.Builder getBackendResource(String originalURL, String url, Long contentLength, int connectTimeout, int readTimeout) throws Exception {
 		if (StringUtil.isEmpty(url)) {
 			return null;
 		}
 
-		Client client = getClient(originalURL);
+		Client client = getClient(originalURL, connectTimeout, readTimeout);
 		WebResource webResource = client.resource(url);
 		WebResource.Builder builder = webResource.getRequestBuilder();
 		if (contentLength != null) {
