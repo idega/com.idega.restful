@@ -186,7 +186,7 @@ public class ConnectionUtil {
 				URIUtil uriUtil = new URIUtil(uri);
 				for (AdvancedProperty queryParam: queryParams) {
 					String value = queryParam.getValue();
-					if (StringUtil.isEmpty(value)) {
+					if (value == null) {
 						continue;
 					}
 
