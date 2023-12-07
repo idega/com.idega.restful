@@ -17,6 +17,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.core.Cookie;
 
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.idegaweb.IWMainApplication;
@@ -213,6 +214,22 @@ public class ConnectionUtil {
 			List<AdvancedProperty> pathParams,
 			AdvancedProperty... queryParams
 	) {
+		return getResponseFromREST(uri, length, type, method, data, connectTimeout, readTimeout, headerParams, pathParams, null, queryParams);
+	}
+
+	public <D> ClientResponse getResponseFromREST(
+			String uri,
+			Long length,
+			String type,
+			String method,
+			D data,
+			int connectTimeout,
+			int readTimeout,
+			List<AdvancedProperty> headerParams,
+			List<AdvancedProperty> pathParams,
+			List<Cookie> cookies,
+			AdvancedProperty... queryParams
+	) {
 		try {
 			String originalURL = uri;
 
@@ -244,6 +261,12 @@ public class ConnectionUtil {
 			if (!ListUtil.isEmpty(headerParams)) {
 				for (AdvancedProperty headerParam: headerParams) {
 					builder = builder.header(headerParam.getName(), headerParam.getValue());
+				}
+			}
+
+			if (!ListUtil.isEmpty(cookies)) {
+				for (Cookie cookie: cookies) {
+					builder = builder.cookie(cookie);
 				}
 			}
 
