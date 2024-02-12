@@ -201,7 +201,19 @@ public class ConnectionUtil {
 			List<AdvancedProperty> pathParams,
 			AdvancedProperty... queryParams
 	) {
-		return getResponseFromREST(uri, length, type, method, data, -1, -1, headerParams, pathParams, queryParams);
+		IWMainApplicationSettings settings = IWMainApplication.getDefaultIWMainApplication().getSettings();
+		return getResponseFromREST(
+				uri,
+				length,
+				type,
+				method,
+				data,
+				settings.getInt("rest.default_conn_timeout", 30000),
+				settings.getInt("rest.default_read_timeout", 30000),
+				headerParams,
+				pathParams,
+				queryParams
+		);
 	}
 
 	public <D> ClientResponse getResponseFromREST(
