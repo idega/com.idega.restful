@@ -4,6 +4,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -276,9 +278,89 @@ public class ConnectionUtil {
 
 			return response;
 		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Error calling RESTful WS at " + uri + ", type " + type + ", method " + method + ". Header params: " + headerParams + ", path params: " +
-					pathParams + ", data: " + data + ", query params: " + queryParams, e);
+			LOGGER.log(
+					Level.WARNING,
+					"Error calling RESTful WS at " + uri + ", type " + type + ", method " + method + ". Header params: " + headerParams + ", path params: " +
+					pathParams + ", data: " + getMaskedData(data) + ", query params: " + (ArrayUtil.isEmpty(queryParams) ? "none" : new ArrayList<>(Arrays.asList(queryParams))),
+					e
+			);
 		}
+		return null;
+	}
+
+	private String getMaskedData(Object data) {
+		if (data == null) {
+			return null;
+		}
+
+		String value = data.toString();
+		if (StringUtil.isEmpty(value)) {
+			return value;
+		}
+
+		List<String> titles = Arrays.asList(
+				"\"cardNumber\":\"",
+				"\"cvc\":\""
+		);
+		for (String title: titles) {
+			String titleValue = getPhrase(value, title, CoreConstants.QOUTE_MARK);
+			if (StringUtil.isEmpty(titleValue)) {
+				continue;
+			}
+
+			int length = titleValue.length();
+			String masked = null;
+
+			//	CVC?
+			if (length <= 3) {
+				int to = length - 1;
+				StringBuilder tmp = new StringBuilder();
+				for (int i = 0; i < to; i++) {
+					tmp.append(CoreConstants.STAR);
+				}
+				tmp.append(titleValue.substring(to));
+				masked = tmp.toString();
+
+			} else {
+				//	Card number
+				masked = length <= 4 ? titleValue : "****-****-****-".concat(titleValue.substring(length - 4));
+			}
+
+			if (!StringUtil.isEmpty(masked)) {
+				value = StringHandler.replace(value, title + titleValue, title + masked);
+			}
+		}
+
+		return value;
+	}
+
+	private String getPhrase(String value, String startPhrase, String endPhrase) {
+		if (StringUtil.isEmpty(value) || StringUtil.isEmpty(startPhrase) || StringUtil.isEmpty(endPhrase)) {
+			return null;
+		}
+
+		int start = value.indexOf(startPhrase);
+		if (start > 0) {
+			start = start + startPhrase.length();
+
+			int i = 0;
+			int step = i + 1;
+			StringBuilder id = new StringBuilder();
+			while (
+					start + i < value.length() &&
+					!endPhrase.equals(value.substring(start + i, start + step))
+			) {
+				String part = value.substring(start + i, start + step);
+				if (!StringUtil.isEmpty(part)) {
+					id.append(part);
+				}
+
+				i++;
+				step = i + 1;
+			}
+			return id.toString();
+		}
+
 		return null;
 	}
 
