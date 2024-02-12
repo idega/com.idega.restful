@@ -23,6 +23,7 @@ import javax.ws.rs.core.Cookie;
 
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.util.ArrayUtil;
 import com.idega.util.CoreConstants;
 import com.idega.util.ListUtil;
@@ -42,11 +43,15 @@ public class ConnectionUtil {
 	private static final Logger LOGGER = Logger.getLogger(ConnectionUtil.class.getName());
 	private static final ConnectionUtil instance = new ConnectionUtil();
 
-	private Map<String, Client> clients = new ConcurrentHashMap<>();
+	private static final Map<String, Client> CLIENTS = new ConcurrentHashMap<>();
 
 	private ConnectionUtil() {}
 
 	public static final ConnectionUtil getInstance() {
+		if (IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("rest.conn_util_new_instance", true)) {
+			return new ConnectionUtil();
+		}
+
 		return instance;
 	}
 
@@ -101,14 +106,14 @@ public class ConnectionUtil {
 
 	public Client getClient(String url, int connectTimeout, int readTimeout) {
 		boolean cacheClients = !StringUtil.isEmpty(url) && IWMainApplication.getDefaultIWMainApplication().getSettings().getBoolean("platform.cache_ws_clients", true);
-		Client client = cacheClients ? clients.get(url) : null;
+		Client client = cacheClients ? CLIENTS.get(url) : null;
 		if (client != null) {
 			return client;
 		}
 
 		client = getClient(url, null, connectTimeout, readTimeout);
 		if (cacheClients && client != null) {
-			clients.put(url, client);
+			CLIENTS.put(url, client);
 		}
 		return client;
 	}
