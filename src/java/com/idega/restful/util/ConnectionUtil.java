@@ -20,6 +20,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.MediaType;
 
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.idegaweb.IWMainApplication;
@@ -37,6 +38,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
+import com.sun.jersey.multipart.FormDataMultiPart;
 
 public class ConnectionUtil {
 
@@ -289,11 +291,16 @@ public class ConnectionUtil {
 				}
 			}
 
-			ClientResponse response = builder
-							.type(type)
-							.method(method, ClientResponse.class, data);
+			if (data instanceof FormDataMultiPart) {
+				return builder
+						.entity(data, MediaType.MULTIPART_FORM_DATA_TYPE)
+						.method(method, ClientResponse.class);
 
-			return response;
+			} else {
+				return builder
+						.type(type)
+						.method(method, ClientResponse.class, data);
+			}
 		} catch (Exception e) {
 			LOGGER.log(
 					Level.WARNING,
